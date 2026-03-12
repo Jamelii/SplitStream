@@ -1,90 +1,151 @@
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private float speed;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private LayerMask ForegroundLayer;
-    [SerializeField] private LayerMask wallLayer;
-    private float wallJumpCooldown;
-    private Rigidbody2D rb;
-    private BoxCollider2D boxCollider;
 
-    private void Awake()
-    {
-        // References for rigidbody and box collider
-        rb = GetComponent<Rigidbody2D>();
-        boxCollider = GetComponent<BoxCollider2D>();
-    }
+    public Rigidbody2D rb;
+    bool isFacingRight = true;
 
-    void Update()
-    {
-        float horizontalInput = Input.GetAxis("Horizontal");
+    [Header("Movement")]
+    public float moveSpeed = 5f;
+    float horizontalMovement;
 
-        // Flip player depending on direction of movement (L/R)
-        if (horizontalInput > 0.01f) {
-            transform.localScale = Vector2.one;
-        } else if (horizontalInput < 0.01f){
-            transform.localScale = new Vector2(-1, 1);
-        }
+    [Header("Jumping")]
+    public float jumpForce = 10f;
+    public int maxJumps = 2;
+    private int jumpsRemaining;
 
-        // Wall jump logic
-        if (wallJumpCooldown > 0.2f)
-        {
-            rb.linearVelocity = new Vector2(horizontalInput * speed, rb.linearVelocity.y);
+    [Header("Ground Check")]
+    public Transform groundCheckPos;
+    public Vector2 groundCheckSize = new Vector2(0.5f, 0.05f);
+    public LayerMask groundLayer;
+    bool isGrounded;
 
-            if (onWall() && !isGrounded())
-            {
-                rb.gravityScale = 0;
-                rb.linearVelocity = Vector2.zero;
-            }
-            else
-            {
-                rb.gravityScale = 7;
+    [Header("Wall Check")]
+    public Transform wallCheckPos;
+    public Vector2 wallCheckSize = new Vector2(0.5f, 0.05f);
+    public LayerMask wallLayer;
 
-                if (Input.GetKey(KeyCode.Space))
-                {
-                    Jump();
-                }
-            }
-        }
-        else
-        {
-            wallJumpCooldown += Time.deltaTime;
-        }
-    }
+    [Header ("Gravity")]
+    [SerializeField] private float baseGravity = 1f;
+    [SerializeField] private float maxFallSpeed = 5f;
+    [SerializeField] private float fallSpeedMultiplier = 2f;
 
-    private void Jump()
-    {
-        if (isGrounded())
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-        }
-        else if(onWall() && !isGrounded())
-        {
-            wallJumpCooldown = 0;
-            rb.linearVelocity = new Vector2(-Mathf.Sign(transform.localScale.x) * 3, 6);
-        }
-    }
+    [Header("Wall Movement")]
+    public float wallSlideSpeed = 2f;
+    bool isWallSliding;
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void Start()
     {
         
     }
 
-    private bool isGrounded()
+    void Update()
     {
-        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.02f, ForegroundLayer);
-        return raycastHit.collider != null;
-    }
-
-    private bool onWall()
-    {
-        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.02f, wallLayer);
-        return raycastHit.collider != null;
+        rb.linearVelocity = new Vector2(horizontalMovement * moveSpeed, rb.linearVelocity.y);
+        GroundCheck();
+        // WallCheck();
+        ProcessGravity();
+        Flip();
     }
 
 
+    // Player Movement
+    public void Move(InputAction.CallbackContext context)
+    {
+        horizontalMovement = context.ReadValue<Vector2>().x;
+    }
+
+    // Player Jump
+    public void Jump(InputAction.CallbackContext context)
+    {
+        if (jumpsRemaining > 0)
+        {
+
+
+            if (context.performed)
+            {
+                // Regular Jump
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                jumpsRemaining--;
+            }
+            else if (context.canceled)
+            {
+                // Short Hop
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y / 2);
+                jumpsRemaining--;
+            }
+        }
+    }
+
+    // Checks if player is touching the ground.
+    private void GroundCheck()
+    {
+        if(Physics2D.OverlapBox(groundCheckPos.position, groundCheckSize, 0, groundLayer))
+        {
+            jumpsRemaining = maxJumps;
+            isGrounded = true;
+        } else
+        {
+            isGrounded = false;
+        }
+    }
+
+   /* private bool WallCheck()
+    {
+        return (Physics2D.OverlapBox(wallCheckPos.position, wallCheckSize, 0, wallLayer));
+        
+    } */
+
+    // Controls the gravity that affects the player.
+    public void ProcessGravity()
+    {
+        if (rb.linearVelocity.y < 0)
+        {
+            rb.gravityScale = baseGravity * fallSpeedMultiplier; // Causes the player's fall speed to increase over time.
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -maxFallSpeed));
+        }
+        else
+        {
+            rb.gravityScale = baseGravity;
+        }
+    }
+    // Controls the player's wall sliding.
+     /*private void ProcessWallSlide()
+    {
+        if (!isGrounded & WallCheck() & horizontalMovement != 0)
+        {
+            isWallSliding = true;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -wallSlideSpeed));
+        } 
+        else
+        {
+            isWallSliding = false;
+        }
+    } */
+    // Sprite flips based on player direction.
+    private void Flip()
+    {
+        if(isFacingRight && horizontalMovement < 0 || !isFacingRight && horizontalMovement > 0) 
+        {
+            isFacingRight = !isFacingRight;
+            Vector2 ls = transform.localScale;
+            ls.x *= -1;
+            transform.localScale = ls;
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        // Visual Box to display ground check.
+        Gizmos.color = Color.white;
+        Gizmos.DrawCube(groundCheckPos.position, groundCheckSize);
+
+        // Visual Box to display wall check.
+        Gizmos.color = Color.blue;
+        Gizmos.DrawCube(wallCheckPos.position, wallCheckSize);
+    }
 }
