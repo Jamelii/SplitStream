@@ -35,8 +35,15 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float fallSpeedMultiplier = 2f;
 
     [Header("Wall Movement")]
-    public float wallSlideSpeed = 2f;
+    public float wallSlideSpeed = 2;
     bool isWallSliding;
+
+    // Wall Jumping
+    bool isWallJumping;
+    float wallJumpDirection;
+    float wallJumpTime = 0.3f;
+    float wallJumpTimer;
+    public Vector2 wallJumpPower = new Vector2(5f, 20f);
 
     void Start()
     {
@@ -45,11 +52,17 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        rb.linearVelocity = new Vector2(horizontalMovement * moveSpeed, rb.linearVelocity.y);
         GroundCheck();
-        // WallCheck();
+        WallCheck();
         ProcessGravity();
-        Flip();
+        ProcessWallSlide();
+        ProcessWallJump();
+
+        if (!isWallJumping)
+        {
+            rb.linearVelocity = new Vector2(horizontalMovement * moveSpeed, rb.linearVelocity.y);
+            Flip();
+        }
     }
 
 
@@ -79,6 +92,26 @@ public class PlayerMovement : MonoBehaviour
                 jumpsRemaining--;
             }
         }
+
+        // Wall Jumping
+
+        if (context.performed && wallJumpTimer > 0f)
+        {
+            isWallJumping = true;
+            rb.linearVelocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y); // Makes the player Jump away from the wall.
+            wallJumpTimer = 0f;
+
+            // Force the player to flip when wall jumping.
+            if(transform.localScale.x != wallJumpDirection)
+            {
+                isFacingRight = !isFacingRight;
+                Vector2 ls = transform.localScale;
+                ls.x *= -1;
+                transform.localScale = ls;
+            }
+
+            Invoke(nameof(CancelWallJump), wallJumpTime + 0.1f); // Wall jump lasts 0.5 seconds -- Can jump again after 0.6 seconds (Keeps movement feeling more fluid).
+        }
     }
 
     // Checks if player is touching the ground.
@@ -94,11 +127,11 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-   /* private bool WallCheck()
+    private bool WallCheck()
     {
         return (Physics2D.OverlapBox(wallCheckPos.position, wallCheckSize, 0, wallLayer));
         
-    } */
+    }
 
     // Controls the gravity that affects the player.
     public void ProcessGravity()
@@ -106,7 +139,7 @@ public class PlayerMovement : MonoBehaviour
         if (rb.linearVelocity.y < 0)
         {
             rb.gravityScale = baseGravity * fallSpeedMultiplier; // Causes the player's fall speed to increase over time.
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -maxFallSpeed));
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -maxFallSpeed)); // Caps the player's fall rate
         }
         else
         {
@@ -114,18 +147,42 @@ public class PlayerMovement : MonoBehaviour
         }
     }
     // Controls the player's wall sliding.
-     /*private void ProcessWallSlide()
+    private void ProcessWallSlide()
     {
         if (!isGrounded & WallCheck() & horizontalMovement != 0)
         {
             isWallSliding = true;
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -wallSlideSpeed));
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -wallSlideSpeed)); // Caps off the player's wall sliding rate.
         } 
         else
         {
             isWallSliding = false;
         }
-    } */
+    } 
+
+    // Controls the player's Wall Jump
+    private void ProcessWallJump()
+    {
+        if (isWallSliding)
+        {
+            isWallJumping = false;
+            wallJumpDirection = -transform.localScale.x;
+            wallJumpTimer = wallJumpTime;
+
+            CancelInvoke(nameof(CancelWallJump));
+        }
+        else if(wallJumpTimer > 0f)
+        {
+            wallJumpTimer -= Time.deltaTime;
+        }
+    } 
+
+    // Cancels the player's wall jump
+
+    private void CancelWallJump()
+    {
+        isWallJumping = false;
+    }
     // Sprite flips based on player direction.
     private void Flip()
     {
