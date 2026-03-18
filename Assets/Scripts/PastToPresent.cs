@@ -2,15 +2,29 @@ using UnityEngine;
 
 public class PastToPresent : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    bool isPresent = false;  
     void Start()
     {
         
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
         
+    }
+
+    public void Swap()
+    {
+        if(Input.GetKey(KeyCode.LeftShift) && isPresent == false)
+        {
+            this.gameObject.SetActive(false);
+            isPresent = true;
+        }
+        else if(Input.GetKey(KeyCode.RightShift) && isPresent == true)
+        {
+            this.gameObject.SetActive(true);
+            isPresent = false;
+        }
     }
 }

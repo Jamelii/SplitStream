@@ -4,8 +4,11 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Foreground
   - Wall
+  - Trap
+  - Ground
+  - Spike
+  - Pit
   layers:
   - Default
   - TransparentFX

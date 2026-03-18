@@ -3,12 +3,14 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
 
     public Rigidbody2D rb;
     bool isFacingRight = true;
+    public Transform respawnPoint;
 
     [Header("Movement")]
     public float moveSpeed = 5f;
@@ -128,6 +130,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // Checks if the player is touching a wall.
     private bool WallCheck()
     {
         return (Physics2D.OverlapBox(wallCheckPos.position, wallCheckSize, 0, wallLayer));
@@ -179,7 +182,6 @@ public class PlayerMovement : MonoBehaviour
     } 
 
     // Cancels the player's wall jump
-
     private void CancelWallJump()
     {
         isWallJumping = false;
@@ -196,6 +198,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // Draws boundary boxes for viewing in editor to see colliders
     private void OnDrawGizmosSelected()
     {
         // Visual Box to display ground check.
@@ -205,5 +208,22 @@ public class PlayerMovement : MonoBehaviour
         // Visual Box to display wall check.
         Gizmos.color = Color.blue;
         Gizmos.DrawCube(wallCheckPos.position, wallCheckSize);
+    }
+
+    // Checks if the player has touched any traps.
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Spike")
+        {
+            Destroy(collision.gameObject);
+            Destroy(this.gameObject);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        if (collision.gameObject.tag == "Pit")
+        {
+            Destroy(this.gameObject);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
 }
