@@ -1,0 +1,9 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/EndgameStyle.uss?fileID=7433441132597879392&amp;guid=b2d24420198d14848ae8ff3720ffcd34&amp;type=3#EndgameStyle" />
+    <ui:VisualElement name="Container" style="flex-grow: 1;">
+        <ui:Label text="Congratulations, You made it out of the lab! Dare you go back?" name="Header" class="header" style="left: 34%; top: 10%;" />
+        <ui:Button text="Quit&#10;" name="QuitButton" class="button" style="color: rgb(255, 255, 255); width: 300px; height: 100px; top: 49%; left: 42%; right: auto;" />
+        <ui:Button text="Restart&#10;" name="RestartButton" class="button" style="top: 10%; left: 42%; right: 0%;" />
+        <ui:Button text="Main Menu&#10;" name="MainMenuButton" class="button" style="top: 15%; left: 42%;" />
+    </ui:VisualElement>
+</ui:UXML>

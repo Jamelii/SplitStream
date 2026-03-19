@@ -46,7 +46,7 @@ public class FallingSpikes : MonoBehaviour
         {
             if (EffectOnDestroyPrefab)
             {
-                Instantiate(EffectOnDestroyPrefab, transform.position, Quaternion.identity);
+                Instantiate(EffectOnDestroyPrefab, new Vector2(transform.position.x, transform.position.y - 0.5f), Quaternion.identity);
             }
             Destroy(this.gameObject);
 

@@ -10,7 +10,6 @@ public class PlayerMovement : MonoBehaviour
 
     public Rigidbody2D rb;
     bool isFacingRight = true;
-    public Transform respawnPoint;
 
     [Header("Movement")]
     public float moveSpeed = 5f;
@@ -226,4 +225,6 @@ public class PlayerMovement : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
+
+    
 }
