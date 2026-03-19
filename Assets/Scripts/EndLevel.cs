@@ -7,7 +7,7 @@ public class EndLevel : MonoBehaviour
     private Animator anim;
 
     [Header("Level Transition Timer")]
-    [SerializeField] public float delayTime = 1.0f;
+    [SerializeField] public float delayTime = 1.0f; // Amount to Delay before swapping to next level.
 
     void Start()
     {

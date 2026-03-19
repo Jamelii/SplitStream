@@ -182,5 +182,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b16624df9f4648e4bb9b580141cc200a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distance: 4.4
+  distance: 4.5
   <EffectOnDestroyPrefab>k__BackingField: {fileID: 4797577148921894264, guid: 876f3a78ecc7a6741b14707ceb9703cc, type: 3}

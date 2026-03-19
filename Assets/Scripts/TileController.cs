@@ -5,6 +5,7 @@ public class TileController : MonoBehaviour
 {
     bool isPresent = true;
 
+    // References to game objects without having to instantiate manually, can be changed in inspector.
     [Header ("Objects")]
     [SerializeField] GameObject PresentGround;
     [SerializeField] GameObject PresentWalls;
@@ -13,8 +14,6 @@ public class TileController : MonoBehaviour
     
     void Start()
     {
-        // PresentGround.SetActive(true);
-        // PresentWalls.SetActive(true);
         RenderPresent();
         UnrenderPast();
     }
@@ -24,12 +23,11 @@ public class TileController : MonoBehaviour
         Swap();
     }
 
+    // Swaps which platforms are currently visible (Present or Past).
     public void Swap()
     {
         if (isPresent == true) 
         {
-            // PresentGround.SetActive(true);
-            // PresentWalls.SetActive(true);
             RenderPresent();
         } 
         if (Input.GetKeyDown(KeyCode.LeftShift) && isPresent == true)
@@ -37,17 +35,16 @@ public class TileController : MonoBehaviour
             UnrenderPresent();
             RenderPast();
             isPresent = false;
-            Debug.Log(isPresent);
         }
         else if (Input.GetKeyDown(KeyCode.LeftShift) && !isPresent == true)
         {
             RenderPresent();
             UnrenderPast();
             isPresent = true;
-            Debug.Log(isPresent);
         }                
     }
 
+    // Methods to enable/disable TilemapCollider2D & TIlemapRenderer Components
     public void RenderPresent()
     {
         PresentGround.GetComponent<TilemapRenderer>().enabled = true;

@@ -40,7 +40,7 @@ public class PlayerMovement : MonoBehaviour
     public float wallSlideSpeed = 2;
     bool isWallSliding;
 
-    // Wall Jumping
+    [Header("Wall Jumping")]
     bool isWallJumping;
     float wallJumpDirection;
     float wallJumpTime = 0.3f;
@@ -60,6 +60,7 @@ public class PlayerMovement : MonoBehaviour
         ProcessWallSlide();
         ProcessWallJump();
 
+        // If player isn't wall jummping and changes directions, call the Flip method.
         if (!isWallJumping)
         {
             rb.linearVelocity = new Vector2(horizontalMovement * moveSpeed, rb.linearVelocity.y);
@@ -100,7 +101,7 @@ public class PlayerMovement : MonoBehaviour
         if (context.performed && wallJumpTimer > 0f)
         {
             isWallJumping = true;
-            rb.linearVelocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y); // Makes the player Jump away from the wall.
+            rb.linearVelocity = new Vector2(wallJumpDirection + wallJumpPower.x, wallJumpPower.y); // Makes the player Jump away from the wall.
             wallJumpTimer = 0f;
 
             // Force the player to flip when wall jumping.
@@ -112,7 +113,7 @@ public class PlayerMovement : MonoBehaviour
                 transform.localScale = ls;
             }
 
-            Invoke(nameof(CancelWallJump), wallJumpTime + 0.1f); // Wall jump lasts 0.5 seconds -- Can jump again after 0.6 seconds (Keeps movement feeling more fluid).
+            Invoke(nameof(CancelWallJump), wallJumpTime + 0.1f); // Wall jump lasts 0.3 seconds -- Can jump again after 0.4 seconds (Keeps movement feeling more fluid).
         }
     }
 
@@ -133,7 +134,6 @@ public class PlayerMovement : MonoBehaviour
     private bool WallCheck()
     {
         return (Physics2D.OverlapBox(wallCheckPos.position, wallCheckSize, 0, wallLayer));
-        
     }
 
     // Controls the gravity that affects the player.
