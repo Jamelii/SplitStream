@@ -101,7 +101,7 @@ public class PlayerMovement : MonoBehaviour
         if (context.performed && wallJumpTimer > 0f)
         {
             isWallJumping = true;
-            rb.linearVelocity = new Vector2(wallJumpDirection + wallJumpPower.x, wallJumpPower.y); // Makes the player Jump away from the wall.
+            rb.linearVelocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y); // Makes the player Jump away from the wall.
             wallJumpTimer = 0f;
 
             // Force the player to flip when wall jumping.
