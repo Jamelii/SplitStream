@@ -5,6 +5,7 @@ public class EndLevel : MonoBehaviour
 {
     BoxCollider2D bc2D;
     private Animator anim;
+    AudioSource _audioSource;
 
     [Header("Level Transition Timer")]
     [SerializeField] public float delayTime = 1.0f; // Amount to Delay before swapping to next level.
@@ -13,6 +14,7 @@ public class EndLevel : MonoBehaviour
     {
         bc2D = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
+        _audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -25,6 +27,7 @@ public class EndLevel : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             anim.Play("Open");
+            _audioSource.Play();
             Invoke("DelayedTransition", delayTime);
         }
     }
